@@ -12,7 +12,8 @@ You can just download the latest binary from [Releases](https://github.com/klass
 If you have a recent **Go** installed, you can use:
 
 ```
-go install https://github.com/klassmann/pubsub-push
+$ go get github.com/klassmann/pubsub-push
+$ go install github.com/klassmann/pubsub-push
 ```
 
 ## Usage
@@ -21,13 +22,13 @@ Before running, you have to set `GOOGLE_APPLICATION_CREDENTIALS` environment var
 
 Example in Linux/Mac:
 ```
-export GOOGLE_APPLICATION_CREDENTIALS=$HOME/project/key.json
+$ export GOOGLE_APPLICATION_CREDENTIALS=$HOME/project/key.json
 ```
 
 After that you should run the following command with your configurations.
 **All arguments are required:**
 ```
-pubsub-push -project gcloud-project -sub subscription_name -endpoint http://localhost
+$ pubsub-push -project gcloud-project -sub subscription_name -endpoint http://localhost
 ```
 
 ### Arguments
