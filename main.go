@@ -7,9 +7,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"cloud.google.com/go/pubsub"
 )
@@ -19,10 +21,40 @@ const (
 	messageMimetype    string = "application/json"
 )
 
+type headers []string
+
+func (h *headers) String() string {
+	b := strings.Builder{}
+
+	for _, v := range *h {
+		b.WriteString(v)
+	}
+
+	return b.String()
+}
+
+func (h *headers) Set(value string) error {
+	*h = append(*h, value)
+	return nil
+}
+
+func (h *headers) applyHeaders(ht *http.Request) {
+	for _, v := range *h {
+		parts := strings.Split(v, "=")
+
+		if len(parts) == 2 {
+			ht.Header.Set(parts[0], parts[1])
+		} else if len(parts) == 1 {
+			ht.Header.Set(parts[0], "")
+		}
+	}
+}
+
 type settings struct {
 	ProjectID    string
 	Subscription string
 	Endpoint     string
+	Headers      headers
 }
 
 type message struct {
@@ -57,6 +89,7 @@ func getArguments() *settings {
 	flag.StringVar(&s.ProjectID, "project", "", "Google Cloud Project ID")
 	flag.StringVar(&s.Subscription, "sub", "", "Subscription name only, without prefix")
 	flag.StringVar(&s.Endpoint, "endpoint", "", "Endpoint, format = http://host:port/path")
+	flag.Var(&s.Headers, "header", "A string that represents a Header to be sent. You can use multiple times. Format: key=value")
 	flag.Parse()
 
 	if s.ProjectID == "" || s.Endpoint == "" || s.Subscription == "" {
@@ -65,6 +98,17 @@ func getArguments() *settings {
 	}
 
 	return &s
+}
+
+func post(url string, contentType string, body io.Reader, h *headers) (*http.Response, error) {
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		log.Fatalf("I was not possible to create a new request: %v\n", err)
+		return nil, err
+	}
+	req.Header.Set("Content-type", contentType)
+	h.applyHeaders(req)
+	return http.DefaultClient.Do(req)
 }
 
 func main() {
@@ -90,7 +134,7 @@ func main() {
 		b, size := encodeMessage(m)
 		buff := bytes.NewBuffer(b)
 
-		resp, err := http.Post(settings.Endpoint, messageMimetype, buff)
+		resp, err := post(settings.Endpoint, messageMimetype, buff, &settings.Headers) //http.Post(settings.Endpoint, messageMimetype, buff)
 
 		if err != nil {
 			log.Fatalf("Error on send message to endpoint: %v\n", err)
