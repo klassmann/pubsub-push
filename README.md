@@ -1,6 +1,6 @@
 # pubsub-push
 
-It is a small utility for receiving **Pull** messages from a subscription of **Google PubSub** and redirect as a **HTTP Push** to a **local endpoint**.
+**pubsub-push** is a small utility for receiving **Pull** messages from a subscription of **Google PubSub** and redirect as a **HTTP Push** to a **local endpoint**.
 
 It is necessary because using the normal **PubSub Push** you need a *public* and *verified* endpoint. Using this tool for **development purposes** you will be able to receive **HTTP Push** locally.
 
@@ -9,7 +9,7 @@ It is necessary because using the normal **PubSub Push** you need a *public* and
 
 You can just download the latest binary from [Releases](https://github.com/klassmann/pubsub-push/releases) tab and put it inside your *PATH*.
 
-If you have a recent **Go** installed, you can use:
+If you have a recent **go** installation, you can use:
 
 ```
 $ go get github.com/klassmann/pubsub-push

@@ -61,6 +61,7 @@ func getArguments() *settings {
 
 	if s.ProjectID == "" || s.Endpoint == "" || s.Subscription == "" {
 		flag.Usage()
+		os.Exit(-1)
 	}
 
 	return &s
@@ -80,6 +81,7 @@ func main() {
 
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
+		os.Exit(-1)
 	}
 
 	fmt.Printf("Listening subscription %s:\n", settings.Subscription)

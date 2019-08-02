@@ -1,4 +1,4 @@
-module github.com/klassmann/local-pubsub-bridge
+module github.com/klassmann/pubsub-push
 
 go 1.12
 
