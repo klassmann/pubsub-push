@@ -53,7 +53,7 @@ $ pubsub-push -project proj-id -sub name -endpoint localhost -header "Content-ty
 -endpoint       The complete URL, including schema, domain, port and the path.
                     Eg: -endpoint http://localhost:5000/services/sync
 
--header         An string like "key=value" for request headers. It can be used
+-header         A string like "key=value" for request headers. It can be used
                 multiplem times.
                     Eg: -header "Content-type=application/json"
 ```

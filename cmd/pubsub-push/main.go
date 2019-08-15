@@ -3,17 +3,13 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
-	"strings"
 
 	"cloud.google.com/go/pubsub"
+	push "github.com/klassmann/pubsub-push"
 )
 
 const (
@@ -21,66 +17,11 @@ const (
 	messageMimetype    string = "application/json"
 )
 
-type headers []string
-
-func (h *headers) String() string {
-	b := strings.Builder{}
-
-	for _, v := range *h {
-		b.WriteString(v)
-	}
-
-	return b.String()
-}
-
-func (h *headers) Set(value string) error {
-	*h = append(*h, value)
-	return nil
-}
-
-func (h *headers) applyHeaders(ht *http.Request) {
-	for _, v := range *h {
-		parts := strings.Split(v, "=")
-
-		if len(parts) == 2 {
-			ht.Header.Set(parts[0], parts[1])
-		} else if len(parts) == 1 {
-			ht.Header.Set(parts[0], "")
-		}
-	}
-}
-
 type settings struct {
 	ProjectID    string
 	Subscription string
 	Endpoint     string
-	Headers      headers
-}
-
-type message struct {
-	MessageID  string            `json:"messageId"`
-	Data       string            `json:"data"`
-	Attributes map[string]string `json:"attributes"`
-}
-
-type request struct {
-	Message message `json:"message"`
-}
-
-func encodeMessage(m *pubsub.Message) ([]byte, int) {
-	data := m.Data
-	req := request{}
-	req.Message.Data = base64.StdEncoding.EncodeToString(data)
-	req.Message.Attributes = m.Attributes
-	req.Message.MessageID = m.ID
-	b, err := json.Marshal(req)
-
-	if err != nil {
-		log.Fatal(err)
-		return []byte{}, 0
-	}
-
-	return b, len(b)
+	Headers      push.Headers
 }
 
 func getArguments() *settings {
@@ -98,17 +39,6 @@ func getArguments() *settings {
 	}
 
 	return &s
-}
-
-func post(url string, contentType string, body io.Reader, h *headers) (*http.Response, error) {
-	req, err := http.NewRequest("POST", url, body)
-	if err != nil {
-		log.Fatalf("I was not possible to create a new request: %v\n", err)
-		return nil, err
-	}
-	req.Header.Set("Content-type", contentType)
-	h.applyHeaders(req)
-	return http.DefaultClient.Do(req)
 }
 
 func main() {
@@ -131,10 +61,10 @@ func main() {
 	fmt.Printf("Listening subscription %s:\n", settings.Subscription)
 	sub := client.Subscription(settings.Subscription)
 	err = sub.Receive(ctx, func(ctx context.Context, m *pubsub.Message) {
-		b, size := encodeMessage(m)
+		b, size := push.EncodeMessage(m)
 		buff := bytes.NewBuffer(b)
 
-		resp, err := post(settings.Endpoint, messageMimetype, buff, &settings.Headers) //http.Post(settings.Endpoint, messageMimetype, buff)
+		resp, err := push.PostMessage(settings.Endpoint, messageMimetype, buff, &settings.Headers)
 
 		if err != nil {
 			log.Fatalf("Error on send message to endpoint: %v\n", err)
