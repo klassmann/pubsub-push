@@ -13,7 +13,7 @@ If you have a recent **go** installation, you can use:
 
 ```
 $ go get github.com/klassmann/pubsub-push
-$ go install github.com/klassmann/pubsub-push
+$ go install github.com/klassmann/pubsub-push/cmd/pubsub-push
 ```
 
 ## Usage
