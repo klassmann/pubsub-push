@@ -1,8 +1,8 @@
 # pubsub-push
 
-**pubsub-push** is a small utility for receiving **Pull** messages from a subscription in **Google PubSub** and redirect them as an **HTTP Push** to a **local endpoint**.
+**pubsub-push** is a small utility for **Pulling** messages from a subscription in **Google PubSub** and redirect them as an **HTTP POST** to a **local endpoint**.
 
-It is necessary because using the normal **PubSub Push** you need a *public* and *verified* endpoint. Using this tool for **development purposes** you will be able to receive **HTTP Push** locally.
+It is necessary because using the normal **PubSub HTTP Push** you need a *public* and a *domain verified* endpoint. Using this tool for **development purposes** you will be able to receive **HTTP Push** locally.
 
 
 ## Installation
