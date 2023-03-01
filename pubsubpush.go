@@ -53,7 +53,7 @@ func (h *Headers) applyHeaders(ht *http.Request) {
 }
 
 // EncodeMessage prepares the message to be like the HTTP Push from PubSub
-// It is an JSON with a data field containing a base64 value
+// It is a JSON with a data field containing a base64 value
 func EncodeMessage(m *pubsub.Message) ([]byte, int) {
 	data := m.Data
 	req := request{}
@@ -70,7 +70,7 @@ func EncodeMessage(m *pubsub.Message) ([]byte, int) {
 	return b, len(b)
 }
 
-// PostMessage sends the the message to endpoint
+// PostMessage sends the message to endpoint
 func PostMessage(url string, contentType string, body io.Reader, h *Headers) (*http.Response, error) {
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {

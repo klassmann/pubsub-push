@@ -46,20 +46,24 @@ func main() {
 
 	_, b := os.LookupEnv(credentialsVarName)
 	if !b {
-		fmt.Printf("You need to define %s variable with the correct credentials.\n", credentialsVarName)
-		os.Exit(-1)
+		fmt.Printf("define %s with the correct credential or the default credential will be used.\n", credentialsVarName)
 	}
 
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, settings.ProjectID)
 
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
-		os.Exit(-1)
+		log.Fatalf("failed to create client: %v", err)
 	}
 
-	fmt.Printf("Listening subscription %s:\n", settings.Subscription)
 	sub := client.Subscription(settings.Subscription)
+	ok, err := sub.Exists(ctx)
+
+	if !ok || err != nil {
+		log.Fatalf("failed to connect to subscription: %s", settings.Subscription)
+	}
+
+	fmt.Printf("listening subscription %s:\n", sub.String())
 	err = sub.Receive(ctx, func(ctx context.Context, m *pubsub.Message) {
 		b, size := push.EncodeMessage(m)
 		buff := bytes.NewBuffer(b)
@@ -67,10 +71,10 @@ func main() {
 		resp, err := push.PostMessage(settings.Endpoint, messageMimetype, buff, &settings.Headers)
 
 		if err != nil {
-			log.Fatalf("Error on send message to endpoint: %v\n", err)
+			log.Printf("[ERROR]: %v\n", err)
 			m.Nack()
 		} else {
-			fmt.Printf("Message with %d bytes was sent to %s, got HTTP %d. Message: ", size, settings.Endpoint, resp.StatusCode)
+			fmt.Printf("[SUCCESS]: message of %d bytes sent to %s: got HTTP %d. Message: ", size, settings.Endpoint, resp.StatusCode)
 			if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 				fmt.Printf("ACK\n")
 				m.Ack()

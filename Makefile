@@ -1,5 +1,5 @@
 
-all: clean win_64 win_32 linux_64 linux_32 darwin_64 darwin_32 freebsd_64 freebsd_32
+all: clean win_64 win_32 linux_64 linux_32 darwin_64
 
 win_64:
 	env GOOS=windows GOARCH=amd64 go build -o "dist/pubsub-push.exe" ./cmd/pubsub-push
@@ -23,11 +23,6 @@ linux_32:
 
 darwin_64:
 	env GOOS=darwin GOARCH=amd64 go build -o dist/pubsub-push ./cmd/pubsub-push
-	gzip dist/pubsub-push -c > "dist/pubsub-push_$(shell cat VERSION)_$@.gz"
-	rm -f dist/pubsub-push
-
-darwin_32:
-	env GOOS=darwin GOARCH=386 go build -o dist/pubsub-push ./cmd/pubsub-push
 	gzip dist/pubsub-push -c > "dist/pubsub-push_$(shell cat VERSION)_$@.gz"
 	rm -f dist/pubsub-push
 
